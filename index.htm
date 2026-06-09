@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Blynk Luxury Dashboard</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+
+background:
+linear-gradient(
+135deg,
+#0a0a0a,
+#121212,
+#1b1b1b
+);
+
+min-height:100vh;
+padding:30px;
+
+color:white;
+
+}
+
+.container{
+
+max-width:1200px;
+margin:auto;
+
+}
+
+h1{
+
+text-align:center;
+
+color:#d4af37;
+
+margin-bottom:30px;
+
+font-size:42px;
+
+}
+
+.grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(320px,1fr));
+
+gap:20px;
+
+}
+
+.card{
+
+background:
+rgba(255,255,255,.05);
+
+backdrop-filter:
+blur(10px);
+
+border:
+1px solid rgba(212,175,55,.4);
+
+border-radius:20px;
+
+padding:25px;
+
+box-shadow:
+0 0 20px rgba(212,175,55,.15);
+
+}
+
+.card h2{
+
+color:#f0d58a;
+
+margin-bottom:15px;
+
+}
+
+.status{
+
+text-align:center;
+
+font-size:48px;
+
+font-weight:bold;
+
+}
+
+.on{
+color:#00ff88;
+}
+
+.off{
+color:#ff5252;
+}
+
+.temp{
+
+text-align:center;
+
+font-size:70px;
+
+font-weight:bold;
+
+color:#ffb74d;
+
+}
+
+.reply{
+
+text-align:center;
+
+font-size:24px;
+
+color:#4fc3f7;
+
+word-break:break-word;
+
+}
+
+.btn-group{
+
+display:flex;
+
+gap:10px;
+
+}
+
+button{
+
+flex:1;
+
+padding:15px;
+
+border:none;
+
+border-radius:12px;
+
+cursor:pointer;
+
+font-size:18px;
+
+font-weight:bold;
+
+transition:.3s;
+
+}
+
+button:hover{
+
+transform:scale(1.03);
+
+}
+
+.btn-on{
+
+background:#00c853;
+color:white;
+
+}
+
+.btn-off{
+
+background:#f44336;
+color:white;
+
+}
+
+.send{
+
+width:100%;
+
+background:
+linear-gradient(
+45deg,
+#d4af37,
+#f0d58a
+);
+
+color:black;
+
+}
+
+.slider{
+
+width:100%;
+
+}
+
+.value{
+
+text-align:center;
+
+font-size:35px;
+
+margin-top:10px;
+
+color:#d4af37;
+
+}
+
+input[type=text]{
+
+width:100%;
+
+padding:12px;
+
+margin-bottom:10px;
+
+background:#222;
+
+border:1px solid #d4af37;
+
+border-radius:10px;
+
+color:white;
+
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>📊 Blynk Dashboard</h1>
+
+<div class="grid">
+
+    <!-- สถานะ LED -->
+    <div class="card">
+
+        <h2>สถานะการทำงาน LED</h2>
+
+        <div
+            id="ledStatus"
+            class="status off">
+
+            🔴 OFF
+
+        </div>
+
+    </div>
+
+    <!-- อุณหภูมิ -->
+    <div class="card">
+
+        <h2>อุณหภูมิ</h2>
+
+        <div
+            id="tempValue"
+            class="temp">
+
+            0°C
+
+        </div>
+
+    </div>
+
+    <!-- ข้อความล่าสุด -->
+    <div class="card">
+
+        <h2>ข้อความล่าสุด</h2>
+
+        <div
+            id="replyLabel"
+            class="reply">
+
+            -
+
+        </div>
+
+    </div>
+
+    <!-- ควบคุม LED -->
+    <div class="card">
+
+        <h2>เปิด - ปิด LED</h2>
+
+        <div class="btn-group">
+
+            <button
+                class="btn-on"
+                onclick="setLED(1)">
+
+                เปิด
+
+            </button>
+
+            <button
+                class="btn-off"
+                onclick="setLED(0)">
+
+                ปิด
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Slider แสง -->
+    <div class="card">
+
+        <h2>ปรับค่าแสง</h2>
+
+        <input
+            type="range"
+            min="0"
+            max="255"
+            value="0"
+            class="slider"
+            id="lightSlider"
+            oninput="updateLight(this.value)"
+        >
+
+        <div
+            id="sliderValue"
+            class="value">
+
+            0
+
+        </div>
+
+    </div>
+
+    <!-- Slider อุณหภูมิ -->
+    <div class="card">
+
+        <h2>ปรับอุณหภูมิ</h2>
+
+        <input
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            class="slider"
+            id="tempSlider"
+            oninput="updateTemperature(this.value)"
+        >
+
+        <div
+            id="tempSliderValue"
+            class="value">
+
+            0°C
+
+        </div>
+
+    </div>
+
+    <!-- ส่งข้อความ -->
+    <div class="card">
+
+        <h2>ส่งข้อความไป Label</h2>
+
+        <input
+            type="text"
+            id="messageInput"
+            placeholder="พิมพ์ข้อความ..."
+        >
+
+        <button
+            class="send"
+            onclick="sendMessage()">
+
+            ส่งข้อความ
+
+        </button>
+
+    </div>
+
+</div>
+
+</div>
+<script>
+
+// =========================
+// TOKEN
+// =========================
+
+const TOKEN =
+"QBMDZGCLEeC9lwbPqKSDGmOVhfd57Ajn";
+
+
+// =========================
+// BUTTON1 (V0)
+// LED STATUS
+// =========================
+
+async function loadButtonStatus(){
+
+    try{
+
+        const res = await fetch(
+        `https://blynk.cloud/external/api/get?token=${TOKEN}&V0`
+        );
+
+        const value =
+        (await res.text()).trim();
+
+        const led =
+        document.getElementById("ledStatus");
+
+        if(value=="1"){
+
+            led.innerHTML="🟢 ON";
+            led.className="status on";
+
+        }else{
+
+            led.innerHTML="🔴 OFF";
+            led.className="status off";
+
+        }
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+// =========================
+// LED1 (V1)
+// =========================
+
+async function setLED(value){
+
+    try{
+
+        // BUTTON1
+        await fetch(
+        `https://blynk.cloud/external/api/update?token=${TOKEN}&V0=${value}`
+        );
+
+        // LED1
+        await fetch(
+        `https://blynk.cloud/external/api/update?token=${TOKEN}&V1=${value}`
+        );
+
+        setTimeout(()=>{
+            refreshAll();
+        },500);
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+// =========================
+// SLIDER แสง V2
+// =========================
+
+async function loadSlider(){
+
+    try{
+
+        const res = await fetch(
+        `https://blynk.cloud/external/api/get?token=${TOKEN}&V2`
+        );
+
+        const value =
+        (await res.text()).trim();
+
+        document.getElementById(
+        "lightSlider"
+        ).value=value;
+
+        document.getElementById(
+        "sliderValue"
+        ).innerHTML=value;
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+async function updateLight(value){
+
+    document.getElementById(
+    "sliderValue"
+    ).innerHTML=value;
+
+    try{
+
+        await fetch(
+        `https://blynk.cloud/external/api/update?token=${TOKEN}&V2=${value}`
+        );
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+// =========================
+// อุณหภูมิ V3
+// =========================
+
+async function loadTemperature(){
+
+    try{
+
+        const res = await fetch(
+        `https://blynk.cloud/external/api/get?token=${TOKEN}&V3`
+        );
+
+        const temp =
+        (await res.text()).trim();
+
+        document.getElementById(
+        "tempValue"
+        ).innerHTML =
+        temp + "°C";
+
+        document.getElementById(
+        "tempSlider"
+        ).value =
+        temp;
+
+        document.getElementById(
+        "tempSliderValue"
+        ).innerHTML =
+        temp + "°C";
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+async function updateTemperature(value){
+
+    document.getElementById(
+    "tempValue"
+    ).innerHTML =
+    value + "°C";
+
+    document.getElementById(
+    "tempSliderValue"
+    ).innerHTML =
+    value + "°C";
+
+    try{
+
+        await fetch(
+        `https://blynk.cloud/external/api/update?token=${TOKEN}&V3=${value}`
+        );
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+// =========================
+// LABEL V4
+// =========================
+
+async function loadLabel(){
+
+    try{
+
+        const res = await fetch(
+        `https://blynk.cloud/external/api/get?token=${TOKEN}&V4`
+        );
+
+        const text =
+        await res.text();
+
+        document.getElementById(
+        "replyLabel"
+        ).innerHTML=text;
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+async function sendMessage(){
+
+    const msg =
+    document.getElementById(
+    "messageInput"
+    ).value;
+
+    if(msg=="") return;
+
+    try{
+
+        await fetch(
+        `https://blynk.cloud/external/api/update?token=${TOKEN}&V4=${encodeURIComponent(msg)}`
+        );
+
+        document.getElementById(
+        "replyLabel"
+        ).innerHTML=msg;
+
+        document.getElementById(
+        "messageInput"
+        ).value="";
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+// =========================
+// REFRESH
+// =========================
+
+function refreshAll(){
+
+    loadButtonStatus();
+    loadSlider();
+    loadTemperature();
+    loadLabel();
+
+}
+
+refreshAll();
+
+setInterval(
+refreshAll,
+2000
+);
+
+</script>
+<script>
+
+// =========================
+// TOKEN
+// =========================
+
+const TOKEN =
+"QBMDZGCLEeC9lwbPqKSDGmOVhfd57Ajn";
+
+
+// =========================
+// BUTTON1 (V0)
+// LED STATUS
+// =========================
+
+async function loadButtonStatus(){
+
+    try{
+
+        const res = await fetch(
+        `https://blynk.cloud/external/api/get?token=${TOKEN}&V0`
+        );
+
+        const value =
+        (await res.text()).trim();
+
+        const led =
+        document.getElementById("ledStatus");
+
+        if(value=="1"){
+
+            led.innerHTML="🟢 ON";
+            led.className="status on";
+
+        }else{
+
+            led.innerHTML="🔴 OFF";
+            led.className="status off";
+
+        }
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+// =========================
+// LED1 (V1)
+// =========================
+
+async function setLED(value){
+
+    try{
+
+        await fetch(
+        `https://blynk.cloud/external/api/update?token=${TOKEN}&V1=${value}`
+        );
+
+        if(value==1){
+
+            document.getElementById("ledStatus")
+            .innerHTML="🟢 ON";
+
+            document.getElementById("ledStatus")
+            .className="status on";
+
+        }else{
+
+            document.getElementById("ledStatus")
+            .innerHTML="🔴 OFF";
+
+            document.getElementById("ledStatus")
+            .className="status off";
+
+        }
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+// =========================
+// SLIDER แสง V2
+// =========================
+
+async function loadSlider(){
+
+    try{
+
+        const res = await fetch(
+        `https://blynk.cloud/external/api/get?token=${TOKEN}&V2`
+        );
+
+        const value =
+        (await res.text()).trim();
+
+        document.getElementById(
+        "lightSlider"
+        ).value=value;
+
+        document.getElementById(
+        "sliderValue"
+        ).innerHTML=value;
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+async function updateLight(value){
+
+    document.getElementById(
+    "sliderValue"
+    ).innerHTML=value;
+
+    try{
+
+        await fetch(
+        `https://blynk.cloud/external/api/update?token=${TOKEN}&V2=${value}`
+        );
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+// =========================
+// อุณหภูมิ V3
+// =========================
+
+async function loadTemperature(){
+
+    try{
+
+        const res = await fetch(
+        `https://blynk.cloud/external/api/get?token=${TOKEN}&V3`
+        );
+
+        const temp =
+        (await res.text()).trim();
+
+        document.getElementById(
+        "tempValue"
+        ).innerHTML =
+        temp + "°C";
+
+        document.getElementById(
+        "tempSlider"
+        ).value =
+        temp;
+
+        document.getElementById(
+        "tempSliderValue"
+        ).innerHTML =
+        temp + "°C";
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+async function updateTemperature(value){
+
+    document.getElementById(
+    "tempValue"
+    ).innerHTML =
+    value + "°C";
+
+    document.getElementById(
+    "tempSliderValue"
+    ).innerHTML =
+    value + "°C";
+
+    try{
+
+        await fetch(
+        `https://blynk.cloud/external/api/update?token=${TOKEN}&V3=${value}`
+        );
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+// =========================
+// LABEL V4
+// =========================
+
+async function loadLabel(){
+
+    try{
+
+        const res = await fetch(
+        `https://blynk.cloud/external/api/get?token=${TOKEN}&V4`
+        );
+
+        const text =
+        await res.text();
+
+        document.getElementById(
+        "replyLabel"
+        ).innerHTML=text;
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+async function sendMessage(){
+
+    const msg =
+    document.getElementById(
+    "messageInput"
+    ).value;
+
+    if(msg=="") return;
+
+    try{
+
+        await fetch(
+        `https://blynk.cloud/external/api/update?token=${TOKEN}&V4=${encodeURIComponent(msg)}`
+        );
+
+        document.getElementById(
+        "replyLabel"
+        ).innerHTML=msg;
+
+        document.getElementById(
+        "messageInput"
+        ).value="";
+
+    }catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+
+// =========================
+// REFRESH
+// =========================
+
+function refreshAll(){
+
+    loadButtonStatus();
+    loadSlider();
+    loadTemperature();
+    loadLabel();
+
+}
+
+refreshAll();
+
+setInterval(
+refreshAll,
+2000
+);
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Luxury Smart Home Dashboard</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+background:
+linear-gradient(
+135deg,
+#090909,
+#121212,
+#1d1d1d
+);
+
+color:white;
+padding:30px;
+min-height:100vh;
+}
+
+.container{
+max-width:1400px;
+margin:auto;
+}
+
+h1{
+text-align:center;
+font-size:42px;
+color:#d4af37;
+margin-bottom:30px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:
+repeat(auto-fit,minmax(320px,1fr));
+gap:20px;
+}
+
+.card{
+background:
+rgba(255,255,255,.05);
+
+border:
+1px solid rgba(212,175,55,.3);
+
+border-radius:20px;
+
+padding:25px;
+
+backdrop-filter:blur(10px);
+
+box-shadow:
+0 0 25px rgba(212,175,55,.15);
+}
+
+.card h2{
+margin-bottom:15px;
+color:#f0d58a;
+}
+
+.status{
+font-size:55px;
+font-weight:bold;
+text-align:center;
+}
+
+.on{
+color:#00ff88;
+}
+
+.off{
+color:#ff5252;
+}
+
+.gauge{
+font-size:70px;
+font-weight:bold;
+text-align:center;
+color:#4fc3f7;
+}
+
+.value{
+font-size:40px;
+text-align:center;
+margin-top:10px;
+color:#d4af37;
+}
+
+.label{
+font-size:24px;
+text-align:center;
+}
+
+.btn-group{
+display:flex;
+gap:10px;
+}
+
+button{
+flex:1;
+padding:15px;
+border:none;
+border-radius:12px;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.btn-on{
+background:#00c853;
+color:white;
+}
+
+.btn-off{
+background:#f44336;
+color:white;
+}
+
+.slider{
+width:100%;
+}
+
+.footer{
+text-align:center;
+margin-top:25px;
+color:#999;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>🏠 Luxury Smart Home Dashboard</h1>
+
+<div class="grid">
+
+<!-- ไฟห้องนั่งเล่น -->
+<div class="card">
+
+<h2>💡 ไฟห้องนั่งเล่น</h2>
+
+<div class="btn-group">
+
+<button
+class="btn-on"
+onclick="setDevice('V0',1,'ไฟห้องนั่งเล่น เปิด')">
+
+เปิด
+
+</button>
+
+<button
+class="btn-off"
+onclick="setDevice('V0',0,'ไฟห้องนั่งเล่น ปิด')">
+
+ปิด
+
+</button>
+
+</div>
+
+</div>
+
+<!-- พัดลม -->
+<div class="card">
+
+<h2>🌬️ พัดลม</h2>
+
+<div class="btn-group">
+
+<button
+class="btn-on"
+onclick="setDevice('V1',1,'พัดลม เปิด')">
+
+เปิด
+
+</button>
+
+<button
+class="btn-off"
+onclick="setDevice('V1',0,'พัดลม ปิด')">
+
+ปิด
+
+</button>
+
+</div>
+
+</div>
+
+<!-- ไฟหน้าบ้าน -->
+<div class="card">
+
+<h2>🏡 ไฟหน้าบ้าน</h2>
+
+<div class="btn-group">
+
+<button
+class="btn-on"
+onclick="setDevice('V2',1,'ไฟหน้าบ้าน เปิด')">
+
+เปิด
+
+</button>
+
+<button
+class="btn-off"
+onclick="setDevice('V2',0,'ไฟหน้าบ้าน ปิด')">
+
+ปิด
+
+</button>
+
+</div>
+
+</div>
+
+<!-- สถานะระบบ -->
+<div class="card">
+
+<h2>🟢 สถานะระบบ</h2>
+
+<div
+id="systemStatus"
+class="status">
+
+กำลังตรวจสอบ...
+
+</div>
+
+</div>
+
+<!-- ความสว่าง -->
+<div class="card">
+
+<h2>🔆 ปรับความสว่าง</h2>
+
+<input
+type="range"
+min="0"
+max="255"
+value="0"
+class="slider"
+id="brightnessSlider"
+onchange="updateBrightness(this.value)"
+>
+
+<div
+id="brightnessValue"
+class="value">
+
+0
+
+</div>
+
+</div>
+
+<!-- อุณหภูมิ -->
+<div class="card">
+
+<h2>🌡️ อุณหภูมิ</h2>
+
+<div
+id="temperature"
+class="gauge">
+
+0°C
+
+</div>
+
+</div>
+
+<!-- ความชื้น -->
+<div class="card">
+
+<h2>💧 ความชื้น</h2>
+
+<div
+id="humidity"
+class="gauge">
+
+0%
+
+</div>
+
+</div>
+
+<!-- แจ้งเตือน -->
+<div class="card">
+
+<h2>📢 แจ้งเตือน</h2>
+
+<div
+id="alertLabel"
+class="label">
+
+ระบบพร้อมทำงาน
+
+</div>
+
+</div>
+
+<!-- เวลา -->
+<div class="card">
+
+<h2>🕒 อัปเดตล่าสุด</h2>
+
+<div
+id="lastUpdate"
+class="label">
+
+-
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+Smart Home IoT Dashboard
+
+</div>
+
+</div>
+<script>
+
+//==========================
+// TOKEN
+//==========================
+
+const TOKEN =
+"cM4FwQitwvMLMNwPwckIifx7pRRx5bIS";
+
+
+//==========================
+// ควบคุม Switch
+//==========================
+
+async function setDevice(pin,value,msg){
+
+try{
+
+await fetch(
+`https://blynk.cloud/external/api/update?token=${TOKEN}&${pin}=${value}`
+);
+
+document.getElementById(
+"alertLabel"
+).innerHTML = msg;
+
+await fetch(
+`https://blynk.cloud/external/api/update?token=${TOKEN}&V7=${encodeURIComponent(msg)}`
+);
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+
+
+//==========================
+// ปรับความสว่าง V4
+//==========================
+
+async function updateBrightness(value){
+
+document.getElementById(
+"brightnessValue"
+).innerHTML = value;
+
+try{
+
+await fetch(
+`https://blynk.cloud/external/api/update?token=${TOKEN}&V4=${value}`
+);
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+
+
+//==========================
+// LED STATUS V3
+//==========================
+
+async function loadLEDStatus(){
+
+  try{
+
+    const res = await fetch(
+      `https://blynk.cloud/external/api/get?token=${TOKEN}&V3`
+    );
+
+    const value = (await res.text()).trim();
+
+    console.log("LED V3 =", value);
+
+    const status = document.getElementById("systemStatus");
+
+    if(value === "1"){
+
+      status.innerHTML = "🟢 ONLINE";
+      status.className = "status on";
+
+    }else{
+
+      status.innerHTML = "🔴 OFFLINE";
+      status.className = "status off";
+
+    }
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+
+//==========================
+// อ่านค่า Slider V4
+//==========================
+
+async function loadBrightness(){
+
+try{
+
+const res = await fetch(
+`https://blynk.cloud/external/api/get?token=${TOKEN}&V4`
+);
+
+const value =
+(await res.text()).trim();
+
+document.getElementById(
+"brightnessSlider"
+).value = value;
+
+document.getElementById(
+"brightnessValue"
+).innerHTML = value;
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+
+
+//==========================
+// อุณหภูมิ V5
+//==========================
+
+async function loadTemperature(){
+
+try{
+
+const res = await fetch(
+`https://blynk.cloud/external/api/get?token=${TOKEN}&V5`
+);
+
+const temp =
+(await res.text()).trim();
+
+document.getElementById(
+"temperature"
+).innerHTML =
+temp + "°C";
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+
+
+//==========================
+// ความชื้น V8
+//==========================
+
+async function loadHumidity(){
+
+try{
+
+const res = await fetch(
+`https://blynk.cloud/external/api/get?token=${TOKEN}&V8`
+);
+
+const hum =
+(await res.text()).trim();
+
+document.getElementById(
+"humidity"
+).innerHTML =
+hum + "%";
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+
+
+//==========================
+// Label V7
+//==========================
+
+async function loadAlert(){
+
+try{
+
+const res = await fetch(
+`https://blynk.cloud/external/api/get?token=${TOKEN}&V7`
+);
+
+const txt =
+await res.text();
+
+document.getElementById(
+"alertLabel"
+).innerHTML = txt;
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+
+
+//==========================
+// เวลา
+//==========================
+
+function updateTime(){
+
+const now =
+new Date();
+
+document.getElementById(
+"lastUpdate"
+).innerHTML =
+now.toLocaleTimeString("th-TH");
+
+}
+
+
+//==========================
+// โหลดทั้งหมด
+//==========================
+
+function refreshAll(){
+
+loadLEDStatus();
+
+loadBrightness();
+
+loadTemperature();
+
+loadHumidity();
+
+loadAlert();
+
+updateTime();
+
+}
+
+
+//==========================
+// เริ่มทำงาน
+//==========================
+
+refreshAll();
+
+setInterval(
+refreshAll,
+2000
+);
+
+</script>
+
+</body>
+</html>
